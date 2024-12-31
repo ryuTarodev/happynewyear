@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy New Year 2024</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: black;
+        }
+
+        #fireworks-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        #main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff7eb3, #ff758c, #ff9489);
+            color: #fff;
+            text-align: center;
+            z-index: -99;
+        }
+
+        .header {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 20px 0;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sub-header {
+            font-size: 1.5em;
+            font-weight: 300;
+            margin: 10px 0 30px;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .image-container {
+            display: none; /* Show the image */
+            width: 100%;
+            max-width: 400px; /* Maximum width of the image */
+            aspect-ratio: 3 / 4; /* Ensures correct aspect ratio for width/height */
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 3px dashed rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+
+        .image-container.show {
+            display: block; /* Show the image */
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 1);
+        }
+        .surprise-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover; /* Ensures the image fits inside the container without overflow */
+        }
+
+        .footer {
+            font-size: 1.2em;
+            margin-top: 20px;
+            font-weight: 400;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .footer:hover {
+            opacity: 0.8;
+        }
+
+        #download-btn {
+            display: none;
+            margin-top: 40px;
+            padding: 10px 20px;
+            background-color: #ff758c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        #download-btn:hover {
+            background-color: #ff7eb3;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks-canvas"></canvas>
+
+    <div id="main-content">
+        <div class="header">✨ Happy New Year 2024 ✨</div>
+        <div class="sub-header">Wishing You Joy, Success, and Prosperity</div>
+        <div id="surprise" onclick="startCountdown()">Click me for a Surprise!</div>
+        <div class="image-container" id="image-container">
+            <img src="./image.png" alt="Happy New Year 2024" class="surprise-image">
+        </div>
+        <button id="download-btn" onclick="downloadImage()">Download Image</button>
+        <div class="footer">May your year be as bright and beautiful as your dreams!</div>
+    </div>
+
+    <!-- Add audio element -->
+    <audio id="background-music" src="./music.mp3" preload="auto"></audio>
+
+    <script>
+        const canvas = document.getElementById('fireworks-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Firework {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 3 + 1;
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                this.vx = Math.random() * 4 - 2;
+                this.vy = Math.random() * 4 - 2;
+                this.alpha = 1;
+            }
+
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 0.01;
+            }
+        }
+
+        function createFireworks(x, y) {
+            for (let i = 0; i < 50; i++) {
+                fireworks.push(new Firework(x, y));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            fireworks.forEach((firework, index) => {
+                if (firework.alpha <= 0) {
+                    fireworks.splice(index, 1);
+                } else {
+                    firework.update();
+                    firework.draw();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        let fireworks = [];
+        canvas.addEventListener('click', (e) => {
+            createFireworks(e.clientX, e.clientY);
+        });
+
+        function startCountdown() {
+            let countdown = 3;
+            const surpriseElement = document.getElementById('surprise');
+            surpriseElement.innerText = `Revealing in ${countdown}...`;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown === 0) {
+                    clearInterval(countdownInterval);
+                    revealImage();
+                } else {
+                    surpriseElement.innerText = `Revealing in ${countdown}...`;
+                    const music = document.getElementById('background-music');
+                    music.play();
+                }
+            }, 1000);
+            
+        }
+
+        function revealImage() {
+            document.getElementById('download-btn').style.display = 'block'; // Show the download button
+            document.getElementById('image-container').classList.add('show');
+            document.getElementById('surprise').style.display = 'none'; // Hide the surprise text
+            
+            // Play background music
+            
+        }
+
+        function downloadImage() {
+            const image = document.querySelector('.surprise-image');
+            const link = document.createElement('a');
+            link.href = image.src;
+            link.download = 'image.png';  // Customize filename if needed
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        setTimeout(() => {
+            document.getElementById('fireworks-canvas').style.display = 'none';
+            document.getElementById('main-content').style.display = 'flex';
+        }, 5000);
+
+        animate();
+    </script>
+</body>
+</html>
